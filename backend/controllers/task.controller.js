@@ -35,3 +35,16 @@ export async function getTaskById(req, res) {
     res.status(500).json({ msg: "Serverfehler beim Abrufen der Task" });
   }
 }
+
+export async function createTask(req, res) {
+  try {
+    const task = await Task.create(req.body);
+    res.status(201).json({
+      msg: "Task erfolgreich erstellt",
+      task
+    });
+  } catch (err) {
+    console.error("createTask error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Erstellen der Task" });
+  }
+}
