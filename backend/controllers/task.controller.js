@@ -48,3 +48,32 @@ export async function createTask(req, res) {
     res.status(500).json({ msg: "Serverfehler beim Erstellen der Task" });
   }
 }
+
+export async function updateTask(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Prüfen, ob die ID gültig ist
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ msg: "Ungültige Task-ID" });
+    }
+
+  
+    const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
+      new: true,          
+      runValidators: true 
+    });
+
+    if (!updatedTask) {
+      return res.status(404).json({ msg: "Task nicht gefunden" });
+    }
+
+    res.json({
+      msg: "Task erfolgreich aktualisiert",
+      task: updatedTask
+    });
+  } catch (err) {
+    console.error("updateTask error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Aktualisieren der Task" });
+  }
+}
