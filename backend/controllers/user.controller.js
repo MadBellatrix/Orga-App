@@ -20,3 +20,19 @@ export async function getUserById(req, res) {
     res.status(500).json({ msg: "Server error" });
   }
 }
+
+export async function createUser(req, res) {
+  try {
+    const { displayName, roles = ["player"], status = "active" } = req.body;
+
+    const user = await User.create({ displayName, roles, status });
+
+    res.status(201).json({
+      msg: "Benutzer erfolgreich erstellt",
+      user
+    });
+  } catch (err) {
+    console.error("createUser error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Erstellen des Benutzers" });
+  }
+}
