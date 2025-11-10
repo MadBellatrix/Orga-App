@@ -6,7 +6,10 @@ mongoose.connection.on('error', (error) => {
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URL, {
+        const uri = process.env.MONGODB_URI;
+        if (!uri) throw new Error('MongoDB URI nicht gesetzt');
+
+        await mongoose.connect(uri, {
             dbName: process.env.DATABASE
         });
         console.log('Connected to MongoDB!');
