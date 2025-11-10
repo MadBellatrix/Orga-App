@@ -2,3 +2,36 @@
 Erstellung, Bearbeitung und Löschung von Aufgaben.
 */
 
+import mongoose from "mongoose";
+import Task from "../models/task.model.js";
+
+
+export async function listTasks(req, res) {
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    res.json(tasks);
+  } catch (err) {
+    console.error("listTasks error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Abrufen der Tasks" });
+  }
+}
+
+
+export async function getTaskById(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ msg: "Ungültige Task-ID" });
+    }
+
+    const task = await Task.findById(id);
+    if (!task) {
+      return res.status(404).json({ msg: "Task nicht gefunden" });
+    }
+
+    res.json(task);
+  } catch (err) {
+    console.error("getTaskById error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Abrufen der Task" });
+  }
+}
