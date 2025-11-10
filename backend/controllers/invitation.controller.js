@@ -1,0 +1,4 @@
+/*
+Verwaltung von Team-Einladungen.
+*/
+

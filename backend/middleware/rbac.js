@@ -1,0 +1,4 @@
+/*
+Prüft Benutzerrollen und Zugriffsrechte.
+*/
+

@@ -1,0 +1,4 @@
+/*
+Endpunkte für Einladungen.
+*/
+
