@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 
 export async function listUsers(req, res) {
@@ -34,5 +35,34 @@ export async function createUser(req, res) {
   } catch (err) {
     console.error("createUser error:", err);
     res.status(500).json({ msg: "Serverfehler beim Erstellen des Benutzers" });
+  }
+}
+
+
+export async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+
+   
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ msg: "Ungültige Benutzer-ID" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, req.body, {
+      new: true,       
+      runValidators: true 
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "Benutzer nicht gefunden" });
+    }
+
+    res.json({
+      msg: "Benutzer erfolgreich aktualisiert",
+      user: updatedUser
+    });
+  } catch (err) {
+    console.error("updateUser error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Aktualisieren" });
   }
 }
