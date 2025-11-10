@@ -1,9 +1,10 @@
-import {Router} from "express";
-import * as user from "../controllers/user.controller.js";
+import { Router } from "express";
+import { listUsers, getUserById } from "../controllers/user.controller.js";
 
-const userRouter = Router();
+const router = Router();
 
-userRouter
-    .post("/", user.createUser)
+// Expose list at GET / (will be mounted at /user)
+router.get("/", listUsers);
+router.get("/:id", getUserById);
 
-export default userRouter;
+export default router;
