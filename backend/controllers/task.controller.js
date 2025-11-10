@@ -77,3 +77,17 @@ export async function updateTask(req, res) {
     res.status(500).json({ msg: "Serverfehler beim Aktualisieren der Task" });
   }
 }
+
+export async function deleteTask(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ msg: "Ungültige Task-ID" });
+
+    const deleted = await Task.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ msg: "Task nicht gefunden" });
+    res.json({ msg: `Task "${deleted.title}" wurde gelöscht.` });
+  } catch (err) {
+    console.error("deleteTask error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Löschen" });
+  }
+}
