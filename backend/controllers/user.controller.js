@@ -66,3 +66,25 @@ export async function updateUser(req, res) {
     res.status(500).json({ msg: "Serverfehler beim Aktualisieren" });
   }
 }
+
+export async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    // prüfen, ob ID formal gültig ist
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ msg: "Ungültige Benutzer-ID" });
+    }
+
+    const deleted = await User.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ msg: "Benutzer nicht gefunden" });
+    }
+
+    res.json({ msg: `Benutzer "${deleted.displayName}" wurde gelöscht.` });
+  } catch (err) {
+    console.error("deleteUser error:", err);
+    res.status(500).json({ msg: "Serverfehler beim Löschen" });
+  }
+}
