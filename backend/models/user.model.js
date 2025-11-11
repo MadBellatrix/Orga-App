@@ -2,17 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    displayName: { type: String, required: true }, // Benutzername / Anzeigename
+    displayName: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    passwordHash: { type: String, required: true },
     roles: {
       type: [String],
       enum: ["superadmin", "admin", "player", "guest"],
       default: ["player"]
     },
-    status: {
-      type: String,
-      enum: ["active", "pending", "disabled"],
-      default: "active"
-    }
+    status: { type: String, enum: ["active", "pending", "disabled"], default: "active" }
   },
   { timestamps: true }
 );
