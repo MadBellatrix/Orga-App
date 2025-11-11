@@ -1,6 +1,7 @@
 import express from "express";
 import connectDB from "./libs/dbConnect.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
 import taskRouter from "./routes/task.routes.js";
 import eventRouter from "./routes/event.routes.js";
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 
 app.use("/user", userRouter);
