@@ -4,6 +4,7 @@ import cors from "cors";
 import userRouter from "./routes/user.routes.js";
 import taskRouter from "./routes/task.routes.js";
 import eventRouter from "./routes/event.routes.js";
+import inviteRouter from "./routes/invitation.routes.js"
 
 connectDB();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/user", userRouter);
 app.use("/task", taskRouter);
 app.use("/event", eventRouter);
+app.use("/invite", inviteRouter)
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port: ${PORT}`)
