@@ -25,10 +25,6 @@ router.patch("/:id",
   updateUser
 );
 
-router.delete("/:id",
-  requireAuth,
-  requirePermission("user:delete"),
-  deleteUser
-);
+router.delete("/:id", requireAuth,requirePermission("user:delete"),deleteUser);
 
 export default router;
