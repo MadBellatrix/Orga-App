@@ -31,4 +31,18 @@ export const createEventSchema = Joi.object({
   }).optional()
 });
 
+
+export const listEventQuerySchema = Joi.object({
+  type: Joi.string().valid("mission","raid","meeting","training").optional(),
+  status: Joi.string().valid("open","in_progress","done","cancelled").optional(),
+  from: Joi.date().optional(),  // filter startAt >= from
+  to: Joi.date().optional(),    // filter startAt <= to
+  q: Joi.string().optional(),   // sucht im title
+  visibility: Joi.string().valid("public","team","private").optional(),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  sort: Joi.string().optional() // z.B. "-startAt", "createdAt"
+});
+
+
 export const updateEventSchema = createEventSchema.min(1);

@@ -39,4 +39,8 @@ const eventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+eventSchema.index({ startAt: 1 });
+eventSchema.index({ type: 1, visibility: 1, startAt: -1 });
+eventSchema.index({ title: "text" });
+
 export default mongoose.model("Event", eventSchema);

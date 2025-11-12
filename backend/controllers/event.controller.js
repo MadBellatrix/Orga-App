@@ -6,13 +6,43 @@ import mongoose from "mongoose";
 import Event from "../models/event.model.js";
 
 export async function listEvents(req, res) {
-    try {
-        const events = await Event.find().sort({ createdAt: -1});
-        res.json(events);
-    } catch (err) {
-        console.error("listEvents error:", err);
-        res.status(500).json({msg: "Serverfehler beim Abrufen der Tasks"});
+  try {
+    const q = req.validatedQuery || req.query || {};
+
+    const query = {};
+    if (q.type) query.type = q.type;
+    if (q.status) query.status = q.status;
+    if (q.visibility) query.visibility = q.visibility;
+    if (q.q) query.title = { $regex: q.q, $options: "i" };
+
+    // Zeitfenster: auf startAt filtern
+    if (q.from || q.to) {
+      query.startAt = {};
+      if (q.from) query.startAt.$gte = new Date(q.from);
+      if (q.to)   query.startAt.$lte = new Date(q.to);
     }
+
+    const page = Number(q.page || 1);
+    const limit = Number(q.limit || 20);
+    const sort = q.sort || "-startAt";
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      Event.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate("assignees", "displayName email")
+        .populate("createdBy", "displayName email"),
+      Event.countDocuments(query)
+    ]);
+
+    res.set("X-Total-Count", String(total));
+    res.json(items);
+  } catch (err) {
+    console.error("listEvents error:", err);
+    res.status(500).json({ msg: "Serverfehler" });
+  }
 }
 
 export async function getEventById(req, res) {
