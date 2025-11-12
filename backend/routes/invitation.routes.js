@@ -34,6 +34,6 @@ router.delete("/:id",
 );
 
 
-router.post("/invitations/accept", acceptInvitation);
+router.post("/accept", acceptInvitation);
 
 export default router;
