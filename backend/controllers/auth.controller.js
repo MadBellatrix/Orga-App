@@ -24,16 +24,20 @@ export async function register(req, res) {
       roles: roles && roles.length ? roles : undefined
     });
 
-    const token = signToken({ userId: user._id, roles: user.roles });
-    res
-      .cookie(COOKIE_NAME, token, {
+      const token = signToken({ userId: user._id, roles: user.roles });
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOptions = {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: COOKIE_AGE_MS
-      })
-      .status(201)
-      .json({ msg: "Registrierung erfolgreich", user: { id: user._id, displayName, email, roles: user.roles } });
+        sameSite: isProduction ? 'strict' : 'lax',
+        secure: isProduction,
+        maxAge: COOKIE_AGE_MS,
+        path: '/',
+      };
+      if (process.env.COOKIE_DOMAIN && isProduction) cookieOptions.domain = process.env.COOKIE_DOMAIN;
+      res
+        .cookie(COOKIE_NAME, token, cookieOptions)
+        .status(201)
+        .json({ msg: "Registrierung erfolgreich", user: { id: user._id, displayName, email, roles: user.roles } });
   } catch (err) {
     console.error("register error:", err);
     res.status(500).json({ msg: "Serverfehler bei der Registrierung" });
@@ -50,13 +54,17 @@ export async function login(req, res) {
     if (!ok) return res.status(401).json({ msg: "Ungültige Anmeldedaten" });
 
     const token = signToken({ userId: user._id, roles: user.roles });
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isProduction,
+      maxAge: COOKIE_AGE_MS,
+      path: '/',
+    };
+    if (process.env.COOKIE_DOMAIN && isProduction) cookieOptions.domain = process.env.COOKIE_DOMAIN;
     res
-      .cookie(COOKIE_NAME, token, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: COOKIE_AGE_MS
-      })
+      .cookie(COOKIE_NAME, token, cookieOptions)
       .json({ msg: "Login erfolgreich", user: { id: user._id, displayName: user.displayName, email: user.email, roles: user.roles } });
   } catch (err) {
     console.error("login error:", err);
@@ -66,7 +74,8 @@ export async function login(req, res) {
 
 export async function logout(req, res) {
   try {
-    res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: "lax", secure: false });
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: isProduction ? 'strict' : 'lax', secure: isProduction });
     res.json({ msg: "Logout erfolgreich" });
   } catch (err) {
     console.error("logout error:", err);
