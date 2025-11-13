@@ -6,13 +6,35 @@ import mongoose from "mongoose";
 import Task from "../models/task.model.js";
 
 
+
 export async function listTasks(req, res) {
   try {
-    const tasks = await Task.find().sort({ createdAt: -1 });
-    res.json(tasks);
+    const q = req.validatedQuery || req.query || {};
+    const query = {};
+
+    if (q.status) query.status = q.status;
+    if (q.priority) query.priority = q.priority;
+    if (q.q) query.title = { $regex: q.q, $options: "i" };
+
+    const page = Number(q.page || 1);
+    const limit = Number(q.limit || 20);
+    const sort = q.sort || "-createdAt";
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      Task.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate("createdBy", "displayName email"),
+      Task.countDocuments(query)
+    ]);
+
+    res.set("X-Total-Count", String(total));
+    res.json(items);
   } catch (err) {
     console.error("listTasks error:", err);
-    res.status(500).json({ msg: "Serverfehler beim Abrufen der Tasks" });
+    res.status(500).json({ msg: "Serverfehler" });
   }
 }
 

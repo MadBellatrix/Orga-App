@@ -11,12 +11,13 @@ export const createTaskSchema = Joi.object({
 
 export const updateTaskSchema = createTaskSchema.min(1);
 
-// 👇 optional: Query-Validation für die Liste
+
 export const listTaskQuerySchema = Joi.object({
   status: Joi.string().valid("open","in_progress","done").optional(),
   priority: Joi.string().valid("low","medium","high").optional(),
-  q: Joi.string().optional(),
+  q: Joi.string().optional(),                       // sucht im title
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(100).optional(),
-  sort: Joi.string().optional()
+  sort: Joi.string().optional()                     // z.B. "-createdAt" oder "dueAt"
 });
+

@@ -1,15 +1,43 @@
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
 
+
 export async function listUsers(req, res) {
   try {
-    const users = await User.find().select("displayName roles status createdAt updatedAt");
-    res.json(users);
+    const q = req.validatedQuery || req.query || {};
+    const query = {};
+
+    if (q.role) query.roles = q.role;
+    if (q.q) {
+      
+      query.$or = [
+        { displayName: { $regex: q.q, $options: "i" } },
+        { email: { $regex: q.q, $options: "i" } }
+      ];
+    }
+
+    const page = Number(q.page || 1);
+    const limit = Number(q.limit || 20);
+    const sort = q.sort || "displayName";          // Default sort
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      User.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .select("displayName email roles createdAt"),
+      User.countDocuments(query)
+    ]);
+
+    res.set("X-Total-Count", String(total));
+    res.json(items);
   } catch (err) {
     console.error("listUsers error:", err);
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ msg: "Serverfehler" });
   }
 }
+
 
 export async function getUserById(req, res) {
   try {

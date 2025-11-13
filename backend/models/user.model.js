@@ -15,4 +15,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.index({ displayName: 1 });
+userSchema.index({ roles: 1 });
+
 export default mongoose.model("User", userSchema);

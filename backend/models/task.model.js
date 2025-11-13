@@ -19,4 +19,9 @@ const taskSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+taskSchema.index({ createdAt: -1 });
+taskSchema.index({ status: 1, priority: 1, createdAt: -1 });
+taskSchema.index({ title: "text" }); // falls du q auf title nutzt
+
+
 export default mongoose.model("Task", taskSchema);
