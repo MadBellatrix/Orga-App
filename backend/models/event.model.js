@@ -42,5 +42,15 @@ const eventSchema = new mongoose.Schema(
 eventSchema.index({ startAt: 1 });
 eventSchema.index({ type: 1, visibility: 1, startAt: -1 });
 eventSchema.index({ title: "text" });
+// Additional indexes for event queries
+eventSchema.index({ type: 1, difficulty: 1 });
+eventSchema.index({ status: 1, startAt: 1 });
+eventSchema.index({ createdBy: 1 });
+eventSchema.index({ 'participants.user': 1 });
+// Text search across title and description
+eventSchema.index({ title: 'text', description: 'text' });
+// Compound indexes
+eventSchema.index({ type: 1, startAt: 1 });
+eventSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model("Event", eventSchema);

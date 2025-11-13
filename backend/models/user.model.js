@@ -17,5 +17,9 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ displayName: 1 });
 userSchema.index({ roles: 1 });
+// Additional indexes for performance
+userSchema.index({ createdAt: -1 });
+// text search across displayName and email
+userSchema.index({ displayName: 'text', email: 'text' });
 
 export default mongoose.model("User", userSchema);

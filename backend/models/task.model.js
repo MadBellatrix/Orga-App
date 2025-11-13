@@ -21,7 +21,14 @@ const taskSchema = new mongoose.Schema(
 
 taskSchema.index({ createdAt: -1 });
 taskSchema.index({ status: 1, priority: 1, createdAt: -1 });
-taskSchema.index({ title: "text" }); // falls du q auf title nutzt
+// Indexes for common queries
+taskSchema.index({ status: 1, createdAt: -1 });
+taskSchema.index({ priority: 1, dueAt: 1 });
+taskSchema.index({ createdBy: 1 });
+taskSchema.index({ assignees: 1 });
+taskSchema.index({ dueAt: 1 });
+// Text search across title + description
+taskSchema.index({ title: 'text', description: 'text' });
 
 
 export default mongoose.model("Task", taskSchema);

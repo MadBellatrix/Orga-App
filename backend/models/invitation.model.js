@@ -54,4 +54,13 @@ invitationSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Indexes
+invitationSchema.index({ email: 1 });
+// token is already declared unique on the field, avoid duplicate index declaration
+invitationSchema.index({ status: 1 });
+invitationSchema.index({ expiresAt: 1 });
+invitationSchema.index({ event: 1 });
+invitationSchema.index({ invitedBy: 1 });
+invitationSchema.index({ email: 1, status: 1 });
+
 export default mongoose.model("Invitation", invitationSchema);
