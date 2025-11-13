@@ -20,16 +20,16 @@ import { globalLimiter, authLimiter, writeLimiter, apiLimiter, loginLimiter } fr
 // Validate required environment variables early
 validateEnv();
 
-const swaggerDocument = YAML.load(new URL('./docs/openapi.yaml', import.meta.url).pathname);
-
-connectDB();
-
- const PORT = process.env.PORT || 3000;
-   app.listen(PORT, '0.0.0.0', () => {
-     console.log(`Server running on port ${PORT}`);
-   });
-
+// Initialize Express app FIRST!
 const app = express();
+
+// Swagger Document (mit Error Handling)
+let swaggerDocument;
+try {
+  swaggerDocument = YAML.load(new URL('./docs/openapi.yaml', import.meta.url).pathname);
+} catch (error) {
+  console.warn('⚠️  Could not load OpenAPI spec:', error.message);
+}
 
 // Security headers
 app.use(helmet({
@@ -80,9 +80,12 @@ app.use(globalLimiter);
 // Health & readiness (mounted at root)
 app.use('/', healthRouter);
 
-// Swagger UI at /docs
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.get('/docs.json', (req, res) => res.json(swaggerDocument));
+// Swagger UI at /docs (nur wenn Dokument geladen wurde)
+if (swaggerDocument) {
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.get('/docs.json', (req, res) => res.json(swaggerDocument));
+  console.log('📚 Swagger UI available at /docs');
+}
 
 // Routes
 app.use('/user', userRouter);
@@ -91,6 +94,21 @@ app.use('/event', eventRouter);
 app.use('/invite', inviteRouter);
 app.use('/auth', authRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on port: ${PORT}`)
-});
+// Connect to Database, THEN start server
+const PORT = process.env.PORT || 3000;
+
+connectDB()
+  .then(() => {
+    console.log('✅ Database connected');
+    
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔗 API: http://localhost:${PORT}`);
+      console.log(`💚 Health: http://localhost:${PORT}/api/health`);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ Database connection failed:', error.message);
+    process.exit(1);
+  });
