@@ -24,7 +24,10 @@ const swaggerDocument = YAML.load(new URL('./docs/openapi.yaml', import.meta.url
 
 connectDB();
 
-const PORT = process.env.PORT || 3000;
+ const PORT = process.env.PORT || 3000;
+   app.listen(PORT, '0.0.0.0', () => {
+     console.log(`Server running on port ${PORT}`);
+   });
 
 const app = express();
 
