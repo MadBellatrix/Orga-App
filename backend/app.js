@@ -15,13 +15,16 @@ import eventRoutes from "./routes/event.routes.js";
 import invitationRoutes from "./routes/invitation.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 
+import { notFound, errorHandler } from "./middleware/error.js";
+
+
 const app = express();
 
 app.use(helmet());
 app.use(morgan("dev"));
 
-// Für lokale Entwicklung: Origin frei + Credentials
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ origin: ["http://localhost:5173","http://localhost:3000"], credentials: true }));
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -36,5 +39,9 @@ app.use("/invitations", invitationRoutes);
 
 // Health
 app.get("/api/v1/health", (_, res) => res.json({ ok: true }));
+
+app.use(notFound);
+app.use(errorHandler);
+
 
 export default app;

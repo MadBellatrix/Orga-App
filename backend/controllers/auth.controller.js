@@ -84,3 +84,16 @@ export async function me(req, res) {
     res.status(500).json({ msg: "Serverfehler" });
   }
 }
+
+
+
+export async function changePassword(req, res) {
+  const { oldPassword, newPassword } = req.body || {};
+  if (!oldPassword || !newPassword) return res.status(400).json({ msg: "Felder fehlen" });
+  const user = await User.findById(req.user.id);
+  const ok = await bcrypt.compare(oldPassword, user.passwordHash);
+  if (!ok) return res.status(401).json({ msg: "Altes Passwort falsch" });
+  user.passwordHash = await bcrypt.hash(newPassword, 10);
+  await user.save();
+  res.json({ msg: "Passwort geändert" });
+}
