@@ -7,6 +7,7 @@ import taskRouter from "./routes/task.routes.js";
 import eventRouter from "./routes/event.routes.js";
 import inviteRouter from "./routes/invitation.routes.js"
 import authRouter from "./routes/auth.routes.js";
+import healthRouter from "./routes/health.routes.js";
 
 connectDB();
 
@@ -20,6 +21,8 @@ app.use(cookieParser());
 
 
 app.use("/user", userRouter);
+// Health & readiness
+app.use("/", healthRouter);
 app.use("/task", taskRouter);
 app.use("/event", eventRouter);
 app.use("/invite", inviteRouter)
