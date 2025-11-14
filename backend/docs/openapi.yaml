@@ -1,0 +1,381 @@
+openapi: 3.1.0
+info:
+  title: OrgaApp API (minimal)
+  version: 1.0.0
+  description: Minimal OpenAPI spec for main endpoints used in tests
+servers:
+  - url: http://localhost:3000
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /auth/register:
+    post:
+      summary: Register user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: Conflict (already exists)
+  /auth/me:
+    get:
+      summary: Current user
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+  /auth/change-password:
+    post:
+      summary: Change password (authenticated)
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password changed
+  /auth/logout:
+    post:
+      summary: Logout (authenticated)
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logged out
+  /user:
+    get:
+      summary: List users (requires auth)
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /task:
+    get:
+      summary: List tasks
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+    post:
+      summary: Create task
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                priority:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCreateResponse'
+  /health:
+    get:
+      summary: Liveness probe
+      tags:
+        - Health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+  /ready:
+    get:
+      summary: Readiness probe
+      tags:
+        - Health
+      responses:
+        '200':
+          description: DB is connected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  db:
+                    type: string
+                    example: up
+        '503':
+          description: DB is not ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  db:
+                    type: string
+                    example: down
+                  state:
+                    type: integer
+                    example: 0
+    /docs:
+      get:
+        summary: Swagger UI (interactive docs)
+        responses:
+          '200':
+            description: UI
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+      example:
+        _id: "6914fd1ea7fa9a8c48225ddb"
+        displayName: "Superadmin"
+        email: "admin@example.com"
+        roles: ["superadmin"]
+    Task:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+      example:
+        _id: "6915b1723c4f358060fbb863"
+        title: "Curl Test Task"
+        status: "open"
+        priority: "low"
+    AuthResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+    TaskCreateResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+        task:
+          $ref: '#/components/schemas/Task'
+    UserCreate:
+      type: object
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    UserUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    TaskCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+        status:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+    Event:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        difficulty:
+          type: integer
+        status:
+          type: string
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+    EventCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+        startAt:
+          type: string
+          format: date-time
+    EventUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+    Invitation:
+      type: object
+      properties:
+        _id:
+          type: string
+        event:
+          type: string
+        recipientEmail:
+          type: string
+        status:
+          type: string
+    InvitationCreate:
+      type: object
+      properties:
+        event:
+          type: string
+        recipientEmail:
+          type: string
+    InvitationUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+
